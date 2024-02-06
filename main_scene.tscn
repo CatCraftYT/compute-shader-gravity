@@ -7,11 +7,17 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_w8c5m"]
 shader = ExtResource("2_jio5a")
+shader_parameter/col1 = Vector3(0, 0, 0)
+shader_parameter/col2 = Vector3(0.15, 0.15, 0.34)
+shader_parameter/col3 = Vector3(0.7, 0.25, 0.25)
+shader_parameter/col4 = Vector3(0.8, 0.8, 0.8)
 
 [node name="RootNode" type="Node2D"]
 script = ExtResource("1_itjmp")
 randomlyDistribute = true
-inaccuracy = 30
+inaccuracy = 3
+startWithRotation = true
+rotationSpeed = 2.5
 
 [node name="Camera2D" type="Camera2D" parent="."]
 
@@ -21,5 +27,5 @@ position = Vector2(1.00001, -0.499954)
 scale = Vector2(16, 16)
 texture = ExtResource("3_lv3ol")
 script = ExtResource("3_v1rv2")
-resolution = 2048
-viewportSize = 1000.0
+resolution = 1024
+viewportSize = 700.0

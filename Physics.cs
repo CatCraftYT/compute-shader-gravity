@@ -7,7 +7,7 @@ public partial class Physics : Node
 	// MUST BE EVEN!! (divisible by 2)
 	// TODO: figure out how to transfer int into compute shader
 	// see https://github.com/athillion/ProceduralPlanetGodot/blob/850ea37428deb1d7c00669f892caa847cd3a0f88/scripts/planet/shape/modules/EarthHeightModule.gd#L65
-	public const int N_PARTICLES = 30000;
+	public const int N_PARTICLES = 12000;
 
 	[Export]
 	public bool randomlyDistribute;
@@ -16,6 +16,10 @@ public partial class Physics : Node
 	public bool inaccuratePhysics;
 	[Export]
 	public int inaccuracy = 10;
+	[Export]
+	public bool startWithRotation;
+	[Export]
+	public float rotationSpeed = 0.1f;
 	[Export]
 	public bool disablePhysics;
 
@@ -40,7 +44,6 @@ public partial class Physics : Node
 				}
 				else {
 					positionArray[index] = new Vector2(-sqrSideLength / 2 + x, sqrSideLength / 2 - y);
-					GD.Print(positionArray[index]);
 				}
 				index++;
 			}
@@ -48,15 +51,14 @@ public partial class Physics : Node
 	}
 
 	void InitParticleVelocity() {
-		int sqrSideLength = Mathf.CeilToInt(Mathf.Sqrt(N_PARTICLES));
 		for (int i = 0; i < N_PARTICLES; i++) {
-			velocityArray[i] = positionArray[i].ToVector3().Cross(Vector3.Back).ToVector2().Normalized() * 0.1f;
+			velocityArray[i] = positionArray[i].ToVector3().Cross(Vector3.Back).ToVector2().Normalized() * rotationSpeed;
 		}
 	}
 
 	public override void _Ready() {
 		InitParticles();
-		//InitParticleVelocity();
+		if (startWithRotation) { InitParticleVelocity(); }
 		renderingDevice = RenderingServer.CreateLocalRenderingDevice();
 
 		// Load GLSL shader
