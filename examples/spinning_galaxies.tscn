@@ -1,18 +1,18 @@
-[gd_scene load_steps=6 format=3 uid="uid://dl8d11a4jrkg3"]
+[gd_scene load_steps=6 format=3 uid="uid://cvrqo1jl4pp1y"]
 
 [ext_resource type="Script" path="res://Physics.cs" id="1_itjmp"]
 [ext_resource type="Shader" path="res://SimRender.gdshader" id="2_jio5a"]
 [ext_resource type="Texture2D" uid="uid://eeg7iod62rp7" path="res://icon.svg" id="3_lv3ol"]
 [ext_resource type="Script" path="res://Rendering.cs" id="3_v1rv2"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_w8c5m"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hh1tb"]
 shader = ExtResource("2_jio5a")
 shader_parameter/col1 = Vector3(0, 0, 0)
 shader_parameter/col2 = Vector3(0.15, 0.15, 0.34)
 shader_parameter/col3 = Vector3(0.7, 0.25, 0.25)
 shader_parameter/col4 = Vector3(0.8, 0.8, 0.8)
 
-[node name="RootNode" type="Node2D"]
+[node name="SpinningGalaxies" type="Node2D"]
 script = ExtResource("1_itjmp")
 randomlyDistribute = true
 inaccuracy = 5
@@ -20,13 +20,14 @@ startWithRotation = true
 rotationSpeed = 0.5
 density = 3.0
 gravityConstant = 0.001
+maxImpulse = 1e-05
 expansionFactor = -1e-05
 particleCount = 18000
 
 [node name="Camera2D" type="Camera2D" parent="."]
 
 [node name="Render" type="Sprite2D" parent="Camera2D"]
-material = SubResource("ShaderMaterial_w8c5m")
+material = SubResource("ShaderMaterial_hh1tb")
 position = Vector2(1.00001, -0.499954)
 scale = Vector2(16, 16)
 texture = ExtResource("3_lv3ol")

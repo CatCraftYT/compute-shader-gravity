@@ -1,14 +1,11 @@
 using Godot;
 using System;
+using System.Linq;
 
+// To enter very small values in the inspector, reduce the "Default float step" setting under Editor -> Editor settings -> Interface -> Inspector -> Default Float Step
+// For small enough values, that doesn't work for some reason, so edit them here directly instead
 public partial class Physics : Node
 {
-	// Make sure to update this in the GLSL compute shader as well
-	// MUST BE EVEN!! (divisible by 2)
-	// TODO: figure out how to transfer int into compute shader
-	// see https://github.com/athillion/ProceduralPlanetGodot/blob/850ea37428deb1d7c00669f892caa847cd3a0f88/scripts/planet/shape/modules/EarthHeightModule.gd#L65
-	public const int N_PARTICLES = 18000;
-
 	[Export]
 	public bool randomlyDistribute;
 	[Export]
@@ -21,26 +18,40 @@ public partial class Physics : Node
 	[Export]
 	public float rotationSpeed = 0.1f;
 	[Export]
+	// Distance between particles in units.
 	public float density = 1;
+
+	[Export]
+	// Gravitational constant. Higher = stronger gravity.
+	float gravityConstant;
+	[Export]
+	// Maximum impulse, maximum amount of force a particle can apply to another in one frame. Lower values usually create larger structures.
+    float maxImpulse = 0.00001f;
+	[Export]
+	// How much each particle is pushed away from the center of the screen.
+    float expansionFactor;
+	[Export]
+    public int particleCount = 18000;
 	[Export]
 	public bool disablePhysics;
 
-	public Vector2Array positionArray = new Vector2Array(N_PARTICLES);
-	Vector2Array velocityArray = new Vector2Array(N_PARTICLES);
+	public Vector2Array positionArray;
+	Vector2Array velocityArray;
 	RenderingDevice renderingDevice;
 	Rid computeShader;
 	Rid velocityBufferRid;
 	int numFramesSinceUpdate;
+	byte[] paramBytes;
 
 	void InitParticles() {
 		// Create one particle for each game unit
-		int sqrSideLength = Mathf.CeilToInt(Mathf.Sqrt(N_PARTICLES));
+		int sqrSideLength = Mathf.CeilToInt(Mathf.Sqrt(particleCount));
 		GD.Print(sqrSideLength);
 
 		int index = 0;
 		for (int y = 0; y < sqrSideLength; y++) {
 			for (int x = 0; x < sqrSideLength; x++) {
-				if (index >= N_PARTICLES) { return; }
+				if (index >= particleCount) { return; }
 				if (randomlyDistribute) {
 					positionArray[index] = new Vector2((float)GD.RandRange(-(float)sqrSideLength / 2 * density, sqrSideLength / 2 * density), (float)GD.RandRange(-(float)sqrSideLength / 2 * density, sqrSideLength / 2 * density));
 				}
@@ -53,14 +64,33 @@ public partial class Physics : Node
 	}
 
 	void InitParticleVelocity() {
-		for (int i = 0; i < N_PARTICLES; i++) {
+		for (int i = 0; i < particleCount; i++) {
 			velocityArray[i] = positionArray[i].ToVector3().Cross(Vector3.Back).ToVector2().Normalized() * rotationSpeed;
 		}
 	}
 
 	public override void _Ready() {
+		// ensure particleCount is even
+		if (particleCount % 2 != 0) { particleCount -= 1; }
+		GD.Print("Simulation values:");
+		GD.Print($"Particle count: {particleCount}");
+		GD.Print($"Gravitational constant: {gravityConstant}");
+		GD.Print($"Max impulse: {maxImpulse}");
+		GD.Print($"Expansion factor: {expansionFactor}");
+
+		positionArray = new Vector2Array(particleCount);
+		velocityArray = new Vector2Array(particleCount);
+
+		paramBytes = new [] {
+			BitConverter.GetBytes(gravityConstant),
+			BitConverter.GetBytes(maxImpulse),
+			BitConverter.GetBytes(expansionFactor),
+			BitConverter.GetBytes(particleCount),
+		}.SelectMany(s => s).ToArray();
+
 		InitParticles();
 		if (startWithRotation) { InitParticleVelocity(); }
+
 		renderingDevice = RenderingServer.CreateLocalRenderingDevice();
 
 		// Load GLSL shader
@@ -76,6 +106,7 @@ public partial class Physics : Node
 	Rid ExecuteComputePipeline() {
 		byte[] positionBytes = new byte[positionArray.InternalArraySize * sizeof(float)];
 		byte[] velocityBytes = new byte[velocityArray.InternalArraySize * sizeof(float)];
+		
 
 		Buffer.BlockCopy(positionArray._internalFloatArray, 0, positionBytes, 0, positionBytes.Length);
 		Buffer.BlockCopy(velocityArray._internalFloatArray, 0, velocityBytes, 0, velocityBytes.Length);
@@ -83,6 +114,7 @@ public partial class Physics : Node
 		// Create storage buffers that can hold our float values.
 		Rid positionBuffer = renderingDevice.StorageBufferCreate((uint)positionBytes.Length, positionBytes);
 		Rid velocityBuffer = renderingDevice.StorageBufferCreate((uint)velocityBytes.Length, velocityBytes);
+		Rid paramBuffer = renderingDevice.StorageBufferCreate((uint)paramBytes.Length, paramBytes);
 
 		// Create a uniform to assign the position buffer to the rendering device
 		RDUniform positionArrayUniform = new RDUniform {
@@ -98,14 +130,21 @@ public partial class Physics : Node
 		};
 		velocityArrayUniform.AddId(velocityBuffer);
 
-		Rid uniformSet = renderingDevice.UniformSetCreate(new Godot.Collections.Array<RDUniform> { positionArrayUniform, velocityArrayUniform }, computeShader, 0);
+		// Create a uniform to assign the parameter buffer to the rendering device
+		RDUniform paramArrayUniform = new RDUniform {
+			UniformType = RenderingDevice.UniformType.StorageBuffer,
+			Binding = 2
+		};
+		paramArrayUniform.AddId(paramBuffer);
+
+		Rid uniformSet = renderingDevice.UniformSetCreate(new Godot.Collections.Array<RDUniform> { positionArrayUniform, velocityArrayUniform, paramArrayUniform }, computeShader, 0);
 
 		// Create a compute pipeline
 		Rid pipeline = renderingDevice.ComputePipelineCreate(computeShader);
 		long computeList = renderingDevice.ComputeListBegin();
 		renderingDevice.ComputeListBindComputePipeline(computeList, pipeline);
 		renderingDevice.ComputeListBindUniformSet(computeList, uniformSet, 0);
-		renderingDevice.ComputeListDispatch(computeList, xGroups: N_PARTICLES / 2, yGroups: 1, zGroups: 1);
+		renderingDevice.ComputeListDispatch(computeList, xGroups: (uint)particleCount / 2, yGroups: 1, zGroups: 1);
 		renderingDevice.ComputeListEnd();
 		
 		renderingDevice.Submit();

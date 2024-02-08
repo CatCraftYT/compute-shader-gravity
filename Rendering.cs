@@ -31,7 +31,7 @@ public partial class Rendering : Sprite2D
 		// Given a point in world space, the point as a pixel would be: position / PIXEL_DENSITY ?
 		Image positionData = Image.Create(resolution, resolution, false, Image.Format.Rf);
 
-		for (int i = 0; i < Physics.N_PARTICLES; i++) {
+		for (int i = 0; i < physicsScript.particleCount; i++) {
 			Vector2I position = (Vector2I)((physicsScript.positionArray[i] + baseOffset) / pixelDensity);
 			if (0 > position.X || position.X >= resolution || 0 > position.Y || position.Y >= resolution) { continue; }
 
