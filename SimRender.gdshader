@@ -7,8 +7,8 @@ uniform vec3 col4 = vec3(1, 1, 1);
 
 //https://stackoverflow.com/q/47285778
 vec3 sample_gradient(float t) {
-    vec3 color = mix(col1, col2, smoothstep(0, 0.33, t));
-    color = mix(color, col3, smoothstep(0.33, 0.66, t));
+	vec3 color = mix(col1, col2, smoothstep(0, 0.33, t));
+	color = mix(color, col3, smoothstep(0.33, 0.66, t));
 	color = mix(color, col4, smoothstep(0.66, 1, t));
 	return color;
 }

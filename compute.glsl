@@ -1,9 +1,10 @@
 #[compute]
 #version 450
 
-const float GRAV_CONSTANT = 0.12;//6.6743015e-11;
-const int N_PARTICLES = 12000;
+const float GRAV_CONSTANT = 0.001;//6.6743015e-11;
+const int N_PARTICLES = 30000;
 const float MAX_IMPULSE = 0.00001;
+const float EXPANSION_FACTOR = 0.000002;
 
 // Invocations in the (x, y, z) dimension
 layout(local_size_x = 2, local_size_y = 1, local_size_z = 1) in;
@@ -66,5 +67,6 @@ void main() {
 
         AddVelocityVector(impulse * directionUnitVec, gl_GlobalInvocationID.x);
     }
+    AddVelocityVector(position * EXPANSION_FACTOR, gl_GlobalInvocationID.x);
 
 }

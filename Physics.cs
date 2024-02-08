@@ -3,11 +3,11 @@ using System;
 
 public partial class Physics : Node
 {
-	// Make sure to update this in the GLSL compute shader as well - i'm too dumb and tired rn to figure out how to transfer an int
+	// Make sure to update this in the GLSL compute shader as well
 	// MUST BE EVEN!! (divisible by 2)
 	// TODO: figure out how to transfer int into compute shader
 	// see https://github.com/athillion/ProceduralPlanetGodot/blob/850ea37428deb1d7c00669f892caa847cd3a0f88/scripts/planet/shape/modules/EarthHeightModule.gd#L65
-	public const int N_PARTICLES = 12000;
+	public const int N_PARTICLES = 30000;
 
 	[Export]
 	public bool randomlyDistribute;
@@ -20,6 +20,8 @@ public partial class Physics : Node
 	public bool startWithRotation;
 	[Export]
 	public float rotationSpeed = 0.1f;
+	[Export]
+	public float density = 1;
 	[Export]
 	public bool disablePhysics;
 
@@ -40,10 +42,10 @@ public partial class Physics : Node
 			for (int x = 0; x < sqrSideLength; x++) {
 				if (index >= N_PARTICLES) { return; }
 				if (randomlyDistribute) {
-					positionArray[index] = new Vector2((float)GD.RandRange(-(float)sqrSideLength / 2, sqrSideLength / 2), (float)GD.RandRange(-(float)sqrSideLength / 2, sqrSideLength / 2));
+					positionArray[index] = new Vector2((float)GD.RandRange(-(float)sqrSideLength / 2 * density, sqrSideLength / 2 * density), (float)GD.RandRange(-(float)sqrSideLength / 2 * density, sqrSideLength / 2 * density));
 				}
 				else {
-					positionArray[index] = new Vector2(-sqrSideLength / 2 + x, sqrSideLength / 2 - y);
+					positionArray[index] = new Vector2((-sqrSideLength / 2 + x) * density, (sqrSideLength / 2 - y) * density);
 				}
 				index++;
 			}
