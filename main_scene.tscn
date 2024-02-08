@@ -16,8 +16,9 @@ shader_parameter/col4 = Vector3(0.8, 0.8, 0.8)
 script = ExtResource("1_itjmp")
 randomlyDistribute = true
 inaccuracy = 5
-rotationSpeed = 3.0
-density = 3.2
+startWithRotation = true
+rotationSpeed = 0.5
+density = 3.0
 
 [node name="Camera2D" type="Camera2D" parent="."]
 
@@ -27,5 +28,5 @@ position = Vector2(1.00001, -0.499954)
 scale = Vector2(16, 16)
 texture = ExtResource("3_lv3ol")
 script = ExtResource("3_v1rv2")
-resolution = 1024
+resolution = 768
 viewportSize = 600.0

@@ -7,7 +7,7 @@ public partial class Physics : Node
 	// MUST BE EVEN!! (divisible by 2)
 	// TODO: figure out how to transfer int into compute shader
 	// see https://github.com/athillion/ProceduralPlanetGodot/blob/850ea37428deb1d7c00669f892caa847cd3a0f88/scripts/planet/shape/modules/EarthHeightModule.gd#L65
-	public const int N_PARTICLES = 30000;
+	public const int N_PARTICLES = 18000;
 
 	[Export]
 	public bool randomlyDistribute;
