@@ -12,17 +12,16 @@ shader_parameter/col2 = Vector3(0.15, 0.15, 0.34)
 shader_parameter/col3 = Vector3(0.7, 0.25, 0.25)
 shader_parameter/col4 = Vector3(0.8, 0.8, 0.8)
 
-[node name="SpinningGalaxies" type="Node2D"]
+[node name="RootNode" type="Node2D"]
 script = ExtResource("1_itjmp")
 randomlyDistribute = true
 inaccuracy = 5
 startWithRotation = true
 rotationSpeed = 0.5
 density = 3.0
-gravityConstant = 0.001
-maxImpulse = 1e-05
-expansionFactor = -1e-05
-particleCount = 18000
+gravityConstant = 10.0
+maxImpulse = 0.1
+expansionFactor = -0.1
 
 [node name="Camera2D" type="Camera2D" parent="."]
 

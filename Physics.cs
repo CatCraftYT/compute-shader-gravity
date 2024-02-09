@@ -2,8 +2,7 @@ using Godot;
 using System;
 using System.Linq;
 
-// To enter very small values in the inspector, reduce the "Default float step" setting under Editor -> Editor settings -> Interface -> Inspector -> Default Float Step
-// For small enough values, that doesn't work for some reason, so edit them here directly instead
+// Some variables are divided by 10000 internally because Godot rounds very small float values in the inspector.
 public partial class Physics : Node
 {
 	[Export]
@@ -20,20 +19,21 @@ public partial class Physics : Node
 	[Export]
 	// Distance between particles in units.
 	public float density = 1;
-
-	[Export]
-	// Gravitational constant. Higher = stronger gravity.
-	float gravityConstant;
-	[Export]
-	// Maximum impulse, maximum amount of force a particle can apply to another in one frame. Lower values usually create larger structures.
-    float maxImpulse = 0.00001f;
-	[Export]
-	// How much each particle is pushed away from the center of the screen.
-    float expansionFactor;
 	[Export]
     public int particleCount = 18000;
+
 	[Export]
 	public bool disablePhysics;
+	[ExportGroup("Simulation parameters (*10000)")]
+	[Export]
+	// Gravitational constant. Higher = stronger gravity.
+	float gravityConstant; // divided by 10000.
+	[Export]
+	// Maximum impulse, maximum amount of force a particle can apply to another in one frame. Lower values usually create larger structures.
+    float maxImpulse = 0.00001f; // divided by 10000.
+	[Export]
+	// How much each particle is pushed away from the center of the screen.
+    float expansionFactor; // divided by 10000.
 
 	public Vector2Array positionArray;
 	Vector2Array velocityArray;
@@ -74,17 +74,17 @@ public partial class Physics : Node
 		if (particleCount % 2 != 0) { particleCount -= 1; }
 		GD.Print("Simulation values:");
 		GD.Print($"Particle count: {particleCount}");
-		GD.Print($"Gravitational constant: {gravityConstant}");
-		GD.Print($"Max impulse: {maxImpulse}");
-		GD.Print($"Expansion factor: {expansionFactor}");
+		GD.Print($"Gravitational constant: {gravityConstant / 10000}");
+		GD.Print($"Max impulse: {maxImpulse / 10000}");
+		GD.Print($"Expansion factor: {expansionFactor / 10000}");
 
 		positionArray = new Vector2Array(particleCount);
 		velocityArray = new Vector2Array(particleCount);
 
 		paramBytes = new [] {
-			BitConverter.GetBytes(gravityConstant),
-			BitConverter.GetBytes(maxImpulse),
-			BitConverter.GetBytes(expansionFactor),
+			BitConverter.GetBytes(gravityConstant / 10000),
+			BitConverter.GetBytes(maxImpulse / 10000),
+			BitConverter.GetBytes(expansionFactor / 10000),
 			BitConverter.GetBytes(particleCount),
 		}.SelectMany(s => s).ToArray();
 

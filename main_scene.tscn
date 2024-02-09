@@ -19,9 +19,9 @@ inaccuracy = 5
 startWithRotation = true
 rotationSpeed = 0.5
 density = 3.0
-gravityConstant = 0.001
-expansionFactor = -1e-05
-particleCount = 18000
+gravityConstant = 10.0
+maxImpulse = 0.1
+expansionFactor = -0.1
 
 [node name="Camera2D" type="Camera2D" parent="."]
 

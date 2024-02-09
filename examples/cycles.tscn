@@ -1,0 +1,33 @@
+[gd_scene load_steps=6 format=3 uid="uid://c3solqjr1xqr4"]
+
+[ext_resource type="Script" path="res://Physics.cs" id="1_0eh51"]
+[ext_resource type="Shader" path="res://SimRender.gdshader" id="2_f1kga"]
+[ext_resource type="Texture2D" uid="uid://eeg7iod62rp7" path="res://icon.svg" id="3_x5iuw"]
+[ext_resource type="Script" path="res://Rendering.cs" id="4_p26lr"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hh1tb"]
+shader = ExtResource("2_f1kga")
+shader_parameter/col1 = Vector3(0, 0, 0)
+shader_parameter/col2 = Vector3(0.15, 0.15, 0.34)
+shader_parameter/col3 = Vector3(0.7, 0.25, 0.25)
+shader_parameter/col4 = Vector3(0.8, 0.8, 0.8)
+
+[node name="RootNode" type="Node2D"]
+script = ExtResource("1_0eh51")
+randomlyDistribute = true
+inaccuracy = 5
+density = 3.0
+gravityConstant = 8.0
+maxImpulse = 0.1
+expansionFactor = -2.1
+
+[node name="Camera2D" type="Camera2D" parent="."]
+
+[node name="Render" type="Sprite2D" parent="Camera2D"]
+material = SubResource("ShaderMaterial_hh1tb")
+position = Vector2(1.00001, -0.499954)
+scale = Vector2(16, 16)
+texture = ExtResource("3_x5iuw")
+script = ExtResource("4_p26lr")
+resolution = 768
+viewportSize = 400.0
